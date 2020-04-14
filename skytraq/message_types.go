@@ -1,4 +1,4 @@
-package main
+package skytraqlib
 
 import (
 	"encoding/binary"
@@ -111,7 +111,10 @@ func Decode_224(payload []byte) {
 }
 
 
-func Decode_225(payload []byte) {
+func Decode_225(payload []byte, glonassMessageState int) int {
+
+	var finalMessageFlag bool
+
 	/*
 		This is the information about the string data bits currently collected by the receiver. This message is composed of
 		GLONASS satellite slot number, string number and bit 80 to bit 09 in relative bi-binary code of the string. The output
@@ -126,11 +129,12 @@ func Decode_225(payload []byte) {
 		8 бит кода Хемминга (с 8 до 1) не включены в сообщение.
 		Биты данных (с 80 по 9) были скорректированы по полярности.
 	*/
-	fmt.Println("==================================")
+	fmt.Printf("================================== Glonass State %v\n", glonassMessageState)
+
 	fmt.Println("GPS Subframe Data (0xE1 225):")
 	if len(payload) != 11 {
 		fmt.Println("RECEIVED BAD LENGTH FOR TYPE 225.")
-		return
+		return glonassMessageState
 	}
 
 	// SVID+64
@@ -181,13 +185,19 @@ func Decode_225(payload []byte) {
 	//}
 
 	//fmt.Printf("Complete String: %s\n", completeString)
-	switch payload[1]{
+	switch payload[1] {
 	case 1:
 		glo_decode_1(completeString)
 	case 2:
 		glo_decode_2(completeString)
 	case 3:
-		glo_decode_3(completeString)
+		// Don't think about consistency of all 5 messages. If receive 1 CRC error of this message, will have wrong results
+		finalMessageFlag = glo_decode_3(completeString)
+		if finalMessageFlag {
+			glonassMessageState = 5
+		} else {
+			glonassMessageState++
+		}
 	case 4:
 		glo_decode_4(completeString)
 	case 5:
@@ -209,14 +219,19 @@ func Decode_225(payload []byte) {
 	case 13:
 		glo_decode_odd_almanac(completeString)
 	case 14:
-		// TODO: DIFFERENT FUNCTIONS
-		//glo_decode_even_almanac(completeString)
-		glo_decode_even_spec_almanac(completeString)
+		if glonassMessageState == 5 {
+			glo_decode_even_spec_almanac(completeString)
+		} else {
+			glo_decode_even_almanac(completeString)
+		}
 	case 15:
-		// TODO: DIFFERENT FUNCTIONS
-		//glo_decode_odd_almanac(completeString)
-		glo_decode_odd_spec_almanac(completeString)
+		if glonassMessageState == 5 {
+			glo_decode_odd_spec_almanac(completeString)
+		} else {
+			glo_decode_odd_almanac(completeString)
+		}
 	}
 
 	fmt.Println("==================================")
+	return glonassMessageState
 }

@@ -1,6 +1,7 @@
-package main
+package skytraqlib
 
 import (
+	"log"
 	"math"
 	"strconv"
 	"fmt"
@@ -165,9 +166,10 @@ func glo_decode_2 (fullString string) {
 	}
 }
 
-func glo_decode_3 (fullString string) {
+func glo_decode_3 (fullString string) bool{
 
 	var sign string
+	var flag bool
 
 	// 1 bit - P3 (80)
 	// признак, состояние "1" которого означает, что в данном кадре передается альманах для 5-ти спутников системы,
@@ -177,8 +179,10 @@ func glo_decode_3 (fullString string) {
 		fmt.Printf("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n")
 		fmt.Printf("Это 5 кадр в суперкадре (4 спутника в альманахе)\n")
 		fmt.Printf("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n")
+		flag = true
 	} else {
 		fmt.Printf("Это с 1 по 4 кадр в суперкадре(5 спутников в альманахе)\n")
+		flag = false
 	}
 	fullString = fullString[1:]
 
@@ -258,9 +262,10 @@ func glo_decode_3 (fullString string) {
 	fmt.Printf("Z координата: %v%v км.\n",sign,float64(coord)/(math.Pow(2,11)))
 
 	if len(fullString) != 0 {
-		fmt.Println("PANIC!")
-		return
+		log.Fatalln("PANIC!")
 	}
+
+	return flag
 }
 
 func glo_decode_4 (fullString string) {
