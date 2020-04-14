@@ -73,19 +73,19 @@ func DecodeSkyTraq (message []byte, gloState int) (bool,int) {
 	case byte(222):
 		fmt.Println("SV and channel status")
 	case byte(223):
-		//fmt.Println("(223) Receiver navigation status")
+		fmt.Println("(223) Receiver navigation status")
 		// can be decoded by gpsdecode
 		//Decode_223(payload[1:])
 		//return true
 	case byte(224):
 		// can be decoded by gpsdecode
-		//fmt.Println("(224) GPS Subframe buffer data")
+		fmt.Println("(224) GPS Subframe buffer data")
 		//Decode_224(payload[1:])
 		//return true
 	case byte(225):
 		fmt.Println("(225) Glonass String buffer data")
 		// cannot be decoded by gpsdecode
-		gloState = Decode_225(message[5:len(message)-3], gloState)
+		//gloState = Decode_225(message[5:len(message)-3], gloState)
 	case byte(226):
 		fmt.Println("Beidou2 D1 Subframe Data")
 	case byte(227):
